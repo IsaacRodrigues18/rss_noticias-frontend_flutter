@@ -62,23 +62,7 @@ class ApiService {
     return response.statusCode == 200;
   }
 
-  /*Future<Map<String, dynamic>?> getPreferenciasUsuario(int usuarioId) async {
-    final url = Uri.parse('$baseUrl/preferencias/$usuarioId');
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        // Converte a resposta JSON em um Map
-        return json.decode(response.body);
-      } else {
-        print('Erro ao buscar preferências: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      print('Erro de conexão: $e');
-      return null;
-    }
-  }*/
+  
 
   Future<Map<String, dynamic>> getPreferenciasUsuario(int usuarioId) async {
   final url = Uri.parse('$baseUrl/preferencias/$usuarioId');
