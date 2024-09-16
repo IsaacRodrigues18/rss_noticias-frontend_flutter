@@ -15,6 +15,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController dataNascimentoController = TextEditingController(); // Controlador para a data de nascimento
   final ApiService apiService = ApiService();
+  
+  final _formKey = GlobalKey<FormState>(); // Chave para o formulário
 
   // Formatar data no padrão dd/MM/yyyy ao sair do campo
   void _formatarData() {
@@ -30,35 +32,30 @@ class _CadastroScreenState extends State<CadastroScreen> {
   }
 
   void _cadastrar() async {
-    final nome = nomeController.text;
-    final login = loginController.text;
-    final senha = senhaController.text;
-    final email = emailController.text;
-    final dataNascimento = dataNascimentoController.text;
+    if (_formKey.currentState!.validate()) {
+      final nome = nomeController.text;
+      final login = loginController.text;
+      final senha = senhaController.text;
+      final email = emailController.text;
+      final dataNascimento = dataNascimentoController.text;
 
-    if (dataNascimento.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, insira a data de nascimento.')),
-      );
-      return;
-    }
+      final dadosUsuario = {
+        'nome': nome,
+        'login': login,
+        'senha': senha,
+        'email': email,
+        'dataNascimento': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parseStrict(dataNascimento)),  // Formato ISO
+        'status': true,
+        'role': 'USER',
+      };
 
-    final dadosUsuario = {
-      'nome': nome,
-      'login': login,
-      'senha': senha,
-      'email': email,
-      'dataNascimento': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parseStrict(dataNascimento)),  // Formato ISO
-      'status': true,
-      'role': 'USER',
-    };
-
-    final result = await apiService.cadastrar(dadosUsuario);
-    if (result != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result)),
-      );
-      Navigator.pop(context); // Volta para a tela de login
+      final resultado = await apiService.cadastrar(dadosUsuario);
+      if (resultado != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(resultado)),
+        );
+        Navigator.pop(context); // Volta para a tela de login
+      }
     }
   }
 
@@ -72,48 +69,82 @@ class _CadastroScreenState extends State<CadastroScreen> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: nomeController,
-                decoration: InputDecoration(labelText: 'Nome'),
-              ),
-              TextField(
-                controller: loginController,
-                decoration: InputDecoration(labelText: 'Login'),
-              ),
-              TextField(
-                controller: senhaController,
-                obscureText: true,
-                decoration: InputDecoration(labelText: 'Senha'),
-              ),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-              ),
-              TextField(
-                controller: dataNascimentoController,
-                decoration: InputDecoration(labelText: 'Data de Nascimento (dd/MM/yyyy)'),
-                keyboardType: TextInputType.datetime,
-                onEditingComplete: _formatarData, // Formata a data ao finalizar a edição
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _cadastrar,
-                child: Text('Cadastrar'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Volta para a tela de login
-                },
-                child: Text('Voltar para Login'),
-              ),
-            ],
+          child: Form(
+            key: _formKey, // Atribuir a chave do formulário
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextFormField(
+                  controller: nomeController,
+                  decoration: InputDecoration(labelText: 'Nome'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira seu nome.';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: loginController,
+                  decoration: InputDecoration(labelText: 'Login'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira seu login.';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: senhaController,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: 'Senha'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira sua senha.';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(labelText: 'Email'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira seu email.';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: dataNascimentoController,
+                  decoration: InputDecoration(labelText: 'Data de Nascimento (dd/MM/yyyy)'),
+                  keyboardType: TextInputType.datetime,
+                  onEditingComplete: _formatarData, // Formata a data ao finalizar a edição
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, insira sua data de nascimento.';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _cadastrar,
+                  child: Text('Cadastrar'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Volta para a tela de login
+                  },
+                  child: Text('Voltar para Login'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+

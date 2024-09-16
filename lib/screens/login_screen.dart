@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final resultado = await apiService.login(email, senha);
     if (resultado != null && resultado['usuarioId'] != null) {
       final usuarioId = resultado['usuarioId'];
-      Navigator.pushNamed(
+      Navigator.pushNamed(  
         context,
         '/categorias',
         arguments: usuarioId, // Passa o ID do usuário para a tela de categorias
